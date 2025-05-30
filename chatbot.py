@@ -1,8 +1,8 @@
-import streamlit as st
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_chroma import Chroma
-from dotenv import load_dotenv
+import streamlit as st # type: ignore
+from langchain_huggingface import HuggingFaceEmbeddings # type: ignore
+from langchain_openai import ChatOpenAI # type: ignore
+from langchain_chroma import Chroma # type: ignore
+from dotenv import load_dotenv # type: ignore
 import os
 
 # Load environment variable
