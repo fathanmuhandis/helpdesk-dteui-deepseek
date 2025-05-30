@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain_huggingface import HuggingFaceEmbeddings 
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from dotenv import load_dotenv
