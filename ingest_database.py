@@ -1,8 +1,8 @@
-from langchain_community.document_loaders import PyPDFDirectoryLoader # type: ignore
-from langchain_text_splitters import RecursiveCharacterTextSplitter # type: ignore
-from langchain_community.embeddings import HuggingFaceEmbeddings # type: ignore
-from langchain_chroma import Chroma # type: ignore
-from dotenv import load_dotenv # type: ignore
+from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from dotenv import load_dotenv
 from uuid import uuid4
 
 # Load environment variables
