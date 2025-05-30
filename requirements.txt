@@ -4,4 +4,4 @@ chromadb
 python-dotenv
 langchain_openai
 langchain_chroma
-langchain_community
+langchain_huggingface
