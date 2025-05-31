@@ -1,15 +1,11 @@
-import streamlit as st # type: ignore
-from langchain_huggingface import HuggingFaceEmbeddings # type: ignore
-from langchain_openai import ChatOpenAI # type: ignore
-from langchain_chroma import Chroma # type: ignore
-from dotenv import load_dotenv # type: ignore
+import streamlit as st
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_chroma import Chroma
 import os
 
-# Load environment variable
-load_dotenv()
-
-# Set API key and base URL for OpenRouter
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENROUTER_API_KEY")
+# Load environment variables
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENROUTER_API_KEY"]
 os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
 
 # Konfigurasi ChromaDB
