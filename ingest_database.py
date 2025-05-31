@@ -1,14 +1,30 @@
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from uuid import uuid4
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
 from dotenv import load_dotenv
-import os
+from uuid import uuid4
 
+# Load environment variables
 load_dotenv()
-DATA_PATH = "data"
 
+# Path configurations
+DATA_PATH = "data"
+CHROMA_PATH = "chroma_db"
+
+# Use HuggingFace embedding model (no API needed)
+embeddings_model = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+# Initialize vector store
+vector_store = Chroma(
+    collection_name="example_collection",
+    embedding_function=embeddings_model,
+    persist_directory=CHROMA_PATH,
+)
+
+# Load documents
 loader = PyPDFDirectoryLoader(DATA_PATH)
 raw_documents = loader.load()
 
@@ -19,10 +35,10 @@ text_splitter = RecursiveCharacterTextSplitter(
     length_function=len,
     separators=["\n\n", "\n", ".", " "]
 )
-
 chunks = text_splitter.split_documents(raw_documents)
-embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vector_store = FAISS.from_documents(chunks, embedding_model)
 
-vector_store.save_local("faiss_index")
-print("✅ FAISS index saved to 'faiss_index/'")
+# Add to vector store
+uuids = [str(uuid4()) for _ in range(len(chunks))]
+vector_store.add_documents(documents=chunks, ids=uuids)
+
+print(f"✅ {len(chunks)} dokumen berhasil diproses ke ChromaDB.")
