@@ -1,68 +1,45 @@
-import streamlit as st
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_chroma import Chroma
 import os
+import streamlit as st
+from dotenv import load_dotenv
+from langchain.vectorstores import FAISS
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
 
-# Load environment variables
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENROUTER_API_KEY"]
 os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
 
-# Konfigurasi ChromaDB
-CHROMA_PATH = "chroma_db"
+# Load FAISS index
+embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+vector_store = FAISS.load_local("faiss_index", embedding_model, allow_dangerous_deserialization=True)
+retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
-# Model Embedding dari Hugging Face
-embeddings_model = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
-
-# Model Chat LLM (DeepSeek via OpenRouter)
+# Load LLM via OpenRouter (DeepSeek)
 llm = ChatOpenAI(
     model="deepseek/deepseek-chat:free",
     openai_api_base=os.environ["OPENAI_API_BASE"],
     temperature=0.5,
-    streaming=True,
+    streaming=True
 )
 
-# Vector Store untuk pencarian
-vector_store = Chroma(
-    collection_name="example_collection",
-    embedding_function=embeddings_model,
-    persist_directory=CHROMA_PATH,
-)
-retriever = vector_store.as_retriever(search_kwargs={"k": 5})
-
-# Judul UI
 st.title("💬 Helpdesk DTE UI — DeepSeek")
 
-# Inisialisasi session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Fungsi untuk membangkitkan respons
 def generate_response(user_input):
     docs = retriever.invoke(user_input)
     knowledge = "\n\n".join(doc.page_content for doc in docs)
 
-    rag_prompt = f"""   
-
+    rag_prompt = f"""
     You are the official virtual academic assistant for the Department of Electrical Engineering, Universitas Indonesia.
-
-    Your role is to provide accurate and helpful information regarding all academic and administrative aspects of the department, including the following study programs:
-    - Electrical Engineering
-    - Computer Engineering
-    - Biomedical Engineering
-
-    You are allowed to draw knowledge from pre-provided PDF documents, as well as official websites or other relevant online academic sources. However, **you must only respond based on information related to the Department of Electrical Engineering at Universitas Indonesia**.
-
-    Do not answer any questions outside this scope. All responses must be delivered in formal, clear, and contextually appropriate Indonesian.
+    Your role is to provide accurate and helpful information related to academic and administrative matters of the department.
+    Answer clearly and formally in Bahasa Indonesia based only on the information below.
 
     The question: {user_input}
 
     The knowledge: {knowledge}
     """
 
-    # Stream respons
     response = ""
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
@@ -71,18 +48,15 @@ def generate_response(user_input):
             message_placeholder.markdown(response + "▌")
         message_placeholder.markdown(response)
 
-    # Simpan ke histori
     st.session_state.chat_history.append({"role": "assistant", "content": response})
 
-# Tampilkan histori percakapan
+# Show chat history
 for chat in st.session_state.chat_history:
     with st.chat_message(chat["role"]):
         st.markdown(chat["content"])
 
-# Input dari pengguna
 user_input = st.chat_input("Ketik pertanyaanmu di sini...")
 if user_input:
-    # Tampilkan input pengguna sebagai bubble
     st.chat_message("user").markdown(user_input)
     st.session_state.chat_history.append({"role": "user", "content": user_input})
     generate_response(user_input)
