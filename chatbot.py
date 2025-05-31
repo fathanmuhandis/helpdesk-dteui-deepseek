@@ -5,7 +5,10 @@ from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENROUTER_API_KEY"]
+# Load environment variables
+load_dotenv()
+# Set API key and base URL for OpenRouter
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENROUTER_API_KEY")
 os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
 
 # Load FAISS index
